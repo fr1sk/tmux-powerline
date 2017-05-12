@@ -6,15 +6,11 @@ update_period=600
 TMUX_POWERLINE_SEG_WEATHER_DATA_PROVIDER_DEFAULT="yahoo"
 TMUX_POWERLINE_SEG_WEATHER_UNIT_DEFAULT="c"
 TMUX_POWERLINE_SEG_WEATHER_UPDATE_PERIOD_DEFAULT="600"
-if shell_is_bsd; then
-	TMUX_POWERLINE_SEG_WEATHER_GREP_DEFAULT="/usr/local/bin/grep"
-else
-	TMUX_POWERLINE_SEG_WEATHER_GREP_DEFAULT="grep"
-fi
-
+TMUX_POWERLINE_SEG_WEATHER_GREP_DEFAULT="grep"
+TMUX_POWERLINE_SEG_WEATHER_LOCATION="532697"
 
 generate_segmentrc() {
-	read -d '' rccontents  << EORC
+read -d '' rccontents  << EORC
 # The data provider to use. Currently only "yahoo" is supported.
 export TMUX_POWERLINE_SEG_WEATHER_DATA_PROVIDER="${TMUX_POWERLINE_SEG_WEATHER_DATA_PROVIDER_DEFAULT}"
 # What unit to use. Can be any of {c,f,k}.
@@ -28,10 +24,12 @@ export TMUX_POWERLINE_SEG_WEATHER_GREP="${TMUX_POWERLINE_SEG_WEATHER_GREP_DEFAUL
 # 1. Go to Yahoo weather http://weather.yahoo.com/
 # 2. Find the weather for you location
 # 3. Copy the last numbers in that URL. e.g. "http://weather.yahoo.com/united-states/california/newport-beach-12796587/" has the numbers "12796587"
-export TMUX_POWERLINE_SEG_WEATHER_LOCATION=""
+export TMUX_POWERLINE_SEG_WEATHER_LOCATION="${TMUX_POWERLINE_SEG_WEATHER_LOCATION_DEFAULT}"
 EORC
-	echo "$rccontents"
+echo "$rccontents"
 }
+
+
 
 run_segment() {
 	__process_settings
@@ -62,7 +60,7 @@ __process_settings() {
 		export TMUX_POWERLINE_SEG_WEATHER_GREP="${TMUX_POWERLINE_SEG_WEATHER_GREP_DEFAULT}"
 	fi
 	if [ -z "$TMUX_POWERLINE_SEG_WEATHER_LOCATION" ]; then
-		echo "No weather location specified.";
+		echo "lol";
 		exit 8
 	fi
 }
@@ -85,7 +83,7 @@ __yahoo_weather() {
 
 	if [ -z "$degree" ]; then
 		weather_data=$(curl --max-time 4 -s "https://query.yahooapis.com/v1/public/yql?format=xml&q=SELECT%20*%20FROM%20weather.forecast%20WHERE%20u=%27${TMUX_POWERLINE_SEG_WEATHER_UNIT}%27%20AND%20woeid%20=%20%27${TMUX_POWERLINE_SEG_WEATHER_LOCATION}%27")
-		if [ "$?" -eq "0" ]; then
+            if [ "$?" -eq "0" ]; then
 			error=$(echo "$weather_data" | grep "problem_cause\|DOCTYPE");
 			if [ -n "$error" ]; then
 				echo "error"
@@ -134,10 +132,12 @@ __get_condition_symbol() {
 			hourmin=$(date +%H%M)
 			if [ "$hourmin" -ge "$sunset" -o "$hourmin" -le "$sunrise" ]; then
 				#echo "☽"
-				echo "☾"
+                #echo "☾"
+                echo "🌙"
 			else
 				#echo "☀"
-				echo "☼"
+                #echo "☼"
+                echo "☀️"
 			fi
 			;;
 		"rain" | "mixed rain and snow" | "mixed rain and sleet" | "freezing drizzle" | "drizzle" | "light drizzle" | "freezing rain" | "showers" | "mixed rain and hail" | "scattered showers" | "isolated thundershowers" | "thundershowers" | "light rain with thunder" | "light rain" | "rain and snow")
@@ -146,19 +146,22 @@ __get_condition_symbol() {
 			;;
 		"snow" | "mixed snow and sleet" | "snow flurries" | "light snow showers" | "blowing snow" | "sleet" | "hail" | "heavy snow" | "scattered snow showers" | "snow showers" | "light snow" | "snow/windy" | "snow grains" | "snow/fog")
 			#echo "☃"
-			echo "❅"
+            #echo "❅"
+            echo "❄️"
 			;;
 		"cloudy" | "mostly cloudy" | "partly cloudy" | "partly cloudy/windy")
-			echo "☁"
+            #echo "☁"
+            echo "☁️"
 			;;
 		"tornado" | "tropical storm" | "hurricane" | "severe thunderstorms" | "thunderstorms" | "isolated thunderstorms" | "scattered thunderstorms")
-			#echo "⚡"
-			echo "☈"
+			echo "⚡"
+            #echo "☈"
 			;;
 		"dust" | "foggy" | "fog" | "haze" | "smoky" | "blustery" | "mist")
 			#echo "♨"
 			#echo "﹌"
-			echo "〰"
+            #echo "〰"
+            echo "🌫"
 			;;
 		"breezy")
 			#echo "🌬"
@@ -166,14 +169,15 @@ __get_condition_symbol() {
 			;;
 		"windy" | "fair/windy")
 			#echo "⚐"
-			echo "⚑"
+            #echo "⚑"
+            echo "💨"
 			;;
 		"clear" | "fair" | "cold")
 			hourmin=$(date +%H%M)
 			if [ "$hourmin" -ge "$sunset" -o "$hourmin" -le "$sunrise" ]; then
-				echo "☾"
+				echo "🌙"
 			else
-				echo "〇"
+				echo "🌤"
 			fi
 			;;
 		*)
